@@ -1,6 +1,7 @@
-import fs from 'fs';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
+
+
 
 const title = `
 ${chalk.blue('  ____   ___  _         _____                 _                            ')}
@@ -17,12 +18,8 @@ ${chalk.blue('                           |___/                                  
 
 console.log(title);
 
-//create a function to 
-
-
-
-function performActions() {
-    inquirer.prompt([
+async function mainMenu() {
+    const {action} = await inquirer.prompt([
         {
             type: 'list',
             name: 'action',
@@ -35,40 +32,44 @@ function performActions() {
                 'Add Role',
                 'View All Departments',
                 'Add Department',
-                'Quit']
-        }
-    ]).then(({ action }) => {
+                'Quit',
+            ],
+        },
+    ]);
         switch (action) {
             case 'View All Employees':
-                this.viewAllEmployees();
+               await viewEmployees();
                 break;
             case 'Add Employee':
-                this.addEmployees();
+               await addEmployee();
                 break;
             case 'Update Employee Role':
-                this.updateEmployeeRole();
+               await updateEmployeeRole();
                 break;
             case 'View All Roles':
-                this.viewAllRoles();
+               await viewRoles();
                 break;
             case 'Add Role':
-                this.addRole();
+               await addRole();
                 break;
             case 'View All Departments':
-                this.viewAllDepartments();
+               await viewDepartments();
                 break;
             case 'Add Department':
-                this.addDepartment();
+               await addDepartment();
                 break;
             case 'Quit':
                 console.log('Goodbye!');
-                process.exit();
-                break;
+                client.end();
+                return;
             
             default:
                 console.log('Invalid action');
+                break;
         }
-    });
+        
 }
+mainMenu();
 
-performActions();
+
+
