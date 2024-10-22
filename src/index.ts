@@ -94,15 +94,20 @@ const mainMenu = async () => {
 
 async function viewEmployees(): Promise<void> {
     try {
-        const result = await pool.query('SELECT * FROM employee');
+        const result = await pool.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department_name,
+            role.salary, manager.first_name || ' ' || manager.last_name AS manager_name
+            FROM employee
+            JOIN role ON employee.role_id = role.id
+            JOIN department ON role.department_id = department.id
+            LEFT JOIN employee manager ON employee.manager_id = manager.id;`);
         
         const table = new Table({
-          head: ['ID', 'First Name', 'Last Name', 'Role ID', 'Manager ID'],
+          head: ['ID', 'First Name', 'Last Name', 'Title', 'Department', 'Salary', 'Manager'],
         });
     
         // Add each row to the table
         result.rows.forEach(row => {
-          table.push([row.id, row.first_name, row.last_name, row.role_id, row.manager_id]);
+          table.push([row.id, row.first_name, row.last_name, row.title, row.department_name, row.salary, row.manager_name]);
         });
     
         console.log(table.toString());  // Display the table in the console
@@ -127,28 +132,24 @@ async function updateEmployeeRole(): Promise<void> {
 
 async function viewRoles(): Promise<void> {
     try {
-        const result = await pool.query(`SELECT e.id, e.first_name, e.last_name, r.title AS role, 
-       d.name AS department, r.salary, 
-       m.first_name AS manager_first_name, m.last_name AS manager_last_name
-FROM employee e
-JOIN role r ON e.role_id = r.id
-JOIN department d ON r.department_id = d.id
-LEFT JOIN employee m ON e.manager_id = m.id`);
-        
+        const result = await pool.query(`SELECT role.id, role.title, role.salary, department.name AS department_name
+            FROM role
+            JOIN department ON role.department_id = department.id;`);
+
         const table = new Table({
-          head: ['Title', 'Salary', 'Department'],
+            head: ['Title', 'Salary', 'Department'],
         });
-    
+
         // Add each row to the table
         result.rows.forEach(row => {
-          table.push([row.title, row.salary, row.department]);
+            table.push([row.title, row.salary, row.department_name]);
         });
-    
+
         console.log(table.toString());  // Display the table in the console
-      } catch (err) {
+    } catch (err) {
         console.error('Error fetching roles:', err);
-      }
-      mainMenu();
+    }
+    mainMenu();
 }
 
 async function addRole(): Promise<void> {
@@ -158,10 +159,26 @@ async function addRole(): Promise<void> {
 }
 
 async function viewDepartments(): Promise<void> {
-    // Implement your logic to view departments
-    console.log('View Departments functionality not yet implemented.');
-    mainMenu();
-}
+    try {
+        const result = await pool.query(`SELECT id, name
+            FROM department;
+            `);
+        
+        const table = new Table({
+          head: ['ID', 'Name'],
+        });
+    
+        // Add each row to the table
+        result.rows.forEach(row => {
+          table.push([row.id, row.name]);
+        });
+    
+        console.log(table.toString());  // Display the table in the console
+      } catch (err) {
+        console.error('Error fetching departments:', err);
+      }
+      mainMenu();
+    }
 
 async function addDepartment(): Promise<void> {
     // Implement your logic to add a department
