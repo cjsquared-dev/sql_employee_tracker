@@ -1,8 +1,9 @@
 import express from 'express';
-import { QueryResult } from 'pg';
+//import { QueryResult } from 'pg';
 import { pool, connectToDb } from './connection.js'; // Assuming pool and connectToDb are set up correctly in connection.js
 import inquirer from 'inquirer';
 import chalk from 'chalk';
+import Table from 'cli-table3';
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -92,15 +93,25 @@ const mainMenu = async () => {
 };
 
 async function viewEmployees(): Promise<void> {
-    pool.query('SELECT * FROM employee', (err: Error, result: QueryResult) => {
-        if (err) {
-            console.error('Error viewing employees:', err);
-        } else if (result) {
-            console.log(result.rows);
-            mainMenu();
-        }
-    });
-}
+    try {
+        const result = await pool.query('SELECT * FROM employee');
+        
+        const table = new Table({
+          head: ['ID', 'First Name', 'Last Name', 'Role ID', 'Manager ID'],
+        });
+    
+        // Add each row to the table
+        result.rows.forEach(row => {
+          table.push([row.id, row.first_name, row.last_name, row.role_id, row.manager_id]);
+        });
+    
+        console.log(table.toString());  // Display the table in the console
+      } catch (err) {
+        console.error('Error fetching employees:', err);
+      }
+      mainMenu();
+    }
+    
 
 async function addEmployee(): Promise<void> {
     // Implement your logic to add an employee
@@ -115,8 +126,29 @@ async function updateEmployeeRole(): Promise<void> {
 }
 
 async function viewRoles(): Promise<void> {
-    console.log('View Roles functionality not yet implemented.');
-    mainMenu();
+    try {
+        const result = await pool.query(`SELECT e.id, e.first_name, e.last_name, r.title AS role, 
+       d.name AS department, r.salary, 
+       m.first_name AS manager_first_name, m.last_name AS manager_last_name
+FROM employee e
+JOIN role r ON e.role_id = r.id
+JOIN department d ON r.department_id = d.id
+LEFT JOIN employee m ON e.manager_id = m.id`);
+        
+        const table = new Table({
+          head: ['Title', 'Salary', 'Department'],
+        });
+    
+        // Add each row to the table
+        result.rows.forEach(row => {
+          table.push([row.title, row.salary, row.department]);
+        });
+    
+        console.log(table.toString());  // Display the table in the console
+      } catch (err) {
+        console.error('Error fetching roles:', err);
+      }
+      mainMenu();
 }
 
 async function addRole(): Promise<void> {
