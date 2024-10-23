@@ -13,7 +13,7 @@ await connectToDb(); // Ensure the database connection is established
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-
+// Display the title of the application
 const title = `
 ${chalk.blue('  ____   ___  _         _____                 _                            ')}
 ${chalk.blue(' / ___| / _ \\| |       | ____|_ __ ___  _ __ | | ___  _   _  ___  ___      ')}
@@ -29,6 +29,7 @@ ${chalk.blue('                           |___/                                  
 
 console.log(title);
 
+// Initialize the application
 async function initApp() {
     try {
         await mainMenu(); // Start the main menu
@@ -38,6 +39,8 @@ async function initApp() {
     }
 }
 
+
+// Inquirer main menu prompting the user for the next action
 const mainMenu = async () => {
     inquirer
         .prompt([
@@ -91,6 +94,7 @@ const mainMenu = async () => {
         });
 };
 
+// Function to view all employees
 async function viewEmployees(): Promise<void> {
     try {
         const result = await pool.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department_name,
@@ -117,7 +121,7 @@ async function viewEmployees(): Promise<void> {
       mainMenu();
     }
     
-
+// Function to add an employee
 async function addEmployee(): Promise<void> {
     try {
         const answers = await inquirer.prompt([
@@ -158,7 +162,7 @@ async function addEmployee(): Promise<void> {
             },
         },
     ]);
-
+    // Insert the new employee into the database
     await pool.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id)
         VALUES ($1, $2, $3, $4);`, [answers.first_name, answers.last_name, answers.role_id, answers.manager_id]);
 
@@ -169,6 +173,7 @@ async function addEmployee(): Promise<void> {
     mainMenu();
 }
 
+// Function to update an employee role
 async function updateEmployeeRole(): Promise<void> {
     try {
         const answers = await inquirer.prompt([
@@ -195,7 +200,7 @@ async function updateEmployeeRole(): Promise<void> {
                 }
             },
         ]);
-
+        // Update the employee's role in the database
         await pool.query(`UPDATE employee
             SET role_id = $1
             WHERE id = $2;`, [answers.role_id, answers.employee_id]);
@@ -207,7 +212,7 @@ async function updateEmployeeRole(): Promise<void> {
     }
     mainMenu();
 }
-
+// Function to view all roles
 async function viewRoles(): Promise<void> {
     try {
         const result = await pool.query(`SELECT role.id, role.title, role.salary, department.name AS department_name
@@ -230,7 +235,7 @@ async function viewRoles(): Promise<void> {
     }
     mainMenu();
 }
-
+// Function to add a role
 async function addRole(): Promise<void> {
     try {
         const answers = await inquirer.prompt([
@@ -257,7 +262,7 @@ async function addRole(): Promise<void> {
                 }
             },
     ]);
-
+    // Insert the new role into the database
     await pool.query(`INSERT INTO role (title, salary, department_id)
         VALUES ($1, $2, $3);`, [answers.role_title, answers.salary, answers.department_id]);
 
@@ -267,7 +272,7 @@ async function addRole(): Promise<void> {
     }
     mainMenu();
 }
-
+// Function to view all departments
 async function viewDepartments(): Promise<void> {
     try {
         const result = await pool.query(`SELECT id, name
@@ -289,7 +294,7 @@ async function viewDepartments(): Promise<void> {
       }
       mainMenu();
     }
-
+// Function to add a department
 async function addDepartment(): Promise<void> {
     try {
         const answers = await inquirer.prompt([
@@ -299,7 +304,7 @@ async function addDepartment(): Promise<void> {
                 message: `Enter the name of the department:`,
             },
         ]);
-
+        // Insert the new department into the database
         await pool.query(`INSERT INTO department (name)
             VALUES ($1);`, [answers.department_name]);
 
