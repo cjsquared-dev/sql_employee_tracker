@@ -98,7 +98,8 @@ async function viewEmployees(): Promise<void> {
             FROM employee
             JOIN role ON employee.role_id = role.id
             JOIN department ON role.department_id = department.id
-            LEFT JOIN employee manager ON employee.manager_id = manager.id;`);
+            LEFT JOIN employee manager ON employee.manager_id = manager.id
+            ORDER BY employee.id ASC;`);
         
         const table = new Table({
           head: ['ID', 'First Name', 'Last Name', 'Title', 'Department', 'Salary', 'Manager'],
@@ -211,7 +212,8 @@ async function viewRoles(): Promise<void> {
     try {
         const result = await pool.query(`SELECT role.id, role.title, role.salary, department.name AS department_name
             FROM role
-            JOIN department ON role.department_id = department.id;`);
+            JOIN department ON role.department_id = department.id
+            ORDER BY department.id ASC;`);
 
         const table = new Table({
             head: ['Title', 'Salary', 'Department'],

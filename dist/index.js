@@ -89,7 +89,8 @@ async function viewEmployees() {
             FROM employee
             JOIN role ON employee.role_id = role.id
             JOIN department ON role.department_id = department.id
-            LEFT JOIN employee manager ON employee.manager_id = manager.id;`);
+            LEFT JOIN employee manager ON employee.manager_id = manager.id
+            ORDER BY employee.id ASC;`);
         const table = new Table({
             head: ['ID', 'First Name', 'Last Name', 'Title', 'Department', 'Salary', 'Manager'],
         });
@@ -154,8 +155,41 @@ async function addEmployee() {
     mainMenu();
 }
 async function updateEmployeeRole() {
-    // Implement your logic to update an employee role
-    console.log('Update Employee Role functionality not yet implemented.');
+    try {
+        const answers = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'employee_id',
+                message: `Select the employee whose role you want to update:`,
+                choices: async () => {
+                    const result = await pool.query(`SELECT id, first_name, last_name FROM employee;`);
+                    return result.rows.map(employee => ({
+                        name: `${employee.first_name} ${employee.last_name}`,
+                        value: employee.id
+                    }));
+                }
+            },
+            {
+                type: 'list',
+                name: 'role_id',
+                message: `Select the employee's new role:`,
+                choices: async () => {
+                    const result = await pool.query(`SELECT id, title FROM role;`);
+                    return result.rows.map(role => ({
+                        name: role.title,
+                        value: role.id
+                    }));
+                }
+            },
+        ]);
+        await pool.query(`UPDATE employee
+            SET role_id = $1
+            WHERE id = $2;`, [answers.role_id, answers.employee_id]);
+        console.log(`Employee role updated successfully.`);
+    }
+    catch (err) {
+        console.error('Error updating employee role:', err);
+    }
     mainMenu();
 }
 async function viewRoles() {
