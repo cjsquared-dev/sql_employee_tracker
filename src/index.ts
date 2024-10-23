@@ -256,8 +256,22 @@ async function viewDepartments(): Promise<void> {
     }
 
 async function addDepartment(): Promise<void> {
-    // Implement your logic to add a department
-    console.log('Add Department functionality not yet implemented.');
+    try {
+        const answers = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'department_name',
+                message: `Enter the name of the department:`,
+            },
+        ]);
+
+        await pool.query(`INSERT INTO department (name)
+            VALUES ($1);`, [answers.department_name]);
+
+        console.log(`Added ${answers.department_name} to the database successfully.`);
+    } catch (err) {
+        console.error('Error adding department:', err);
+    }
     mainMenu();
 }
 

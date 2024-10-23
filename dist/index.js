@@ -206,7 +206,7 @@ async function addRole() {
         ]);
         await pool.query(`INSERT INTO role (title, salary, department_id)
         VALUES ($1, $2, $3);`, [answers.role_title, answers.salary, answers.department_id]);
-        console.log(`Role ${answers.role_title} added successfully.`);
+        console.log(`Added ${answers.role_title} to the database successfully.`);
     }
     catch (err) {
         console.error('Error adding role:', err);
@@ -233,8 +233,21 @@ async function viewDepartments() {
     mainMenu();
 }
 async function addDepartment() {
-    // Implement your logic to add a department
-    console.log('Add Department functionality not yet implemented.');
+    try {
+        const answers = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'department_name',
+                message: `Enter the name of the department:`,
+            },
+        ]);
+        await pool.query(`INSERT INTO department (name)
+            VALUES ($1);`, [answers.department_name]);
+        console.log(`Added ${answers.department_name} to the database successfully.`);
+    }
+    catch (err) {
+        console.error('Error adding department:', err);
+    }
     mainMenu();
 }
 initApp(); // Start the application
