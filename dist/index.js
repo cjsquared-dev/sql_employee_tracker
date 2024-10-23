@@ -106,8 +106,54 @@ async function viewEmployees() {
     mainMenu();
 }
 async function addEmployee() {
+    try {
+        const answers = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'first_name',
+                message: `Enter the employee's first name:`,
+            },
+            {
+                type: 'input',
+                name: 'last_name',
+                message: `Enter the employee's last name:`,
+            },
+            {
+                type: 'list',
+                name: 'role_id',
+                message: `Enter the employee's role:`,
+                choices: async () => {
+                    const result = await pool.query(`SELECT id, title FROM role;`);
+                    return result.rows.map(role => ({
+                        name: role.title,
+                        value: role.id
+                    }));
+                }
+            },
+            {
+                type: 'list',
+                name: 'manager_id',
+                message: `Enter the employee's manager:`,
+                choices: async () => {
+                    const result = await pool.query(`SELECT id, first_name, last_name FROM employee;`);
+                    const managers = result.rows.map(manager => ({
+                        name: `${manager.first_name} ${manager.last_name}`,
+                        value: manager.id,
+                    }));
+                    managers.unshift({ name: 'None', value: null });
+                    return managers;
+                },
+            },
+        ]);
+        await pool.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id)
+        VALUES ($1, $2, $3, $4);`, [answers.first_name, answers.last_name, answers.role_id, answers.manager_id]);
+        console.log('Employee added successfully.');
+    }
+    catch (err) {
+        console.error('Error adding employee:', err);
+    }
     // Implement your logic to add an employee
-    console.log('Add Employee functionality not yet implemented.');
+    //console.log('Add Employee functionality not yet implemented.');
     mainMenu();
 }
 async function updateEmployeeRole() {
