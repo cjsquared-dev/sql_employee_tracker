@@ -1,5 +1,4 @@
 import express from 'express';
-//import { QueryResult } from 'pg';
 import { pool, connectToDb } from './connection.js'; // Assuming pool and connectToDb are set up correctly in connection.js
 import inquirer from 'inquirer';
 import chalk from 'chalk';
@@ -147,13 +146,11 @@ async function addEmployee() {
         ]);
         await pool.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id)
         VALUES ($1, $2, $3, $4);`, [answers.first_name, answers.last_name, answers.role_id, answers.manager_id]);
-        console.log('Employee added successfully.');
+        console.log(`Employee ${answers.first_name} ${answers.last_name} added successfully.`);
     }
     catch (err) {
         console.error('Error adding employee:', err);
     }
-    // Implement your logic to add an employee
-    //console.log('Add Employee functionality not yet implemented.');
     mainMenu();
 }
 async function updateEmployeeRole() {
@@ -181,8 +178,39 @@ async function viewRoles() {
     mainMenu();
 }
 async function addRole() {
-    // Implement your logic to add a role
-    console.log('Add Role functionality not yet implemented.');
+    try {
+        const answers = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'role_title',
+                message: `What is the name of the role?`,
+            },
+            {
+                type: 'input',
+                name: 'salary',
+                message: `What is the salary of the role?`,
+                validate: (input) => !isNaN(input) || 'Please enter a valid number',
+            },
+            {
+                type: 'list',
+                name: 'department_id',
+                message: `Which department does the role belong to?`,
+                choices: async () => {
+                    const result = await pool.query(`SELECT id, name FROM department;`);
+                    return result.rows.map(dept => ({
+                        name: dept.name,
+                        value: dept.id
+                    }));
+                }
+            },
+        ]);
+        await pool.query(`INSERT INTO role (title, salary, department_id)
+        VALUES ($1, $2, $3);`, [answers.role_title, answers.salary, answers.department_id]);
+        console.log(`Role ${answers.role_title} added successfully.`);
+    }
+    catch (err) {
+        console.error('Error adding role:', err);
+    }
     mainMenu();
 }
 async function viewDepartments() {
