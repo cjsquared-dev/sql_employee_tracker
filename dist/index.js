@@ -8,6 +8,7 @@ const app = express();
 await connectToDb(); // Ensure the database connection is established
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+// Display the title of the application
 const title = `
 ${chalk.blue('  ____   ___  _         _____                 _                            ')}
 ${chalk.blue(' / ___| / _ \\| |       | ____|_ __ ___  _ __ | | ___  _   _  ___  ___      ')}
@@ -21,6 +22,7 @@ ${chalk.blue(' |_|  |_|\\__,_|_| |_|\\__,_|\\__, |\\___|_|                      
 ${chalk.blue('                           |___/                                           ')}
 `;
 console.log(title);
+// Initialize the application
 async function initApp() {
     try {
         await mainMenu(); // Start the main menu
@@ -30,6 +32,7 @@ async function initApp() {
         process.exit(1); // Exit if initialization fails
     }
 }
+// Inquirer main menu prompting the user for the next action
 const mainMenu = async () => {
     inquirer
         .prompt([
@@ -82,6 +85,7 @@ const mainMenu = async () => {
         }
     });
 };
+// Function to view all employees
 async function viewEmployees() {
     try {
         const result = await pool.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department_name,
@@ -105,6 +109,7 @@ async function viewEmployees() {
     }
     mainMenu();
 }
+// Function to add an employee
 async function addEmployee() {
     try {
         const answers = await inquirer.prompt([
@@ -145,6 +150,7 @@ async function addEmployee() {
                 },
             },
         ]);
+        // Insert the new employee into the database
         await pool.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id)
         VALUES ($1, $2, $3, $4);`, [answers.first_name, answers.last_name, answers.role_id, answers.manager_id]);
         console.log(`Employee ${answers.first_name} ${answers.last_name} added successfully.`);
@@ -154,6 +160,7 @@ async function addEmployee() {
     }
     mainMenu();
 }
+// Function to update an employee role
 async function updateEmployeeRole() {
     try {
         const answers = await inquirer.prompt([
@@ -182,6 +189,7 @@ async function updateEmployeeRole() {
                 }
             },
         ]);
+        // Update the employee's role in the database
         await pool.query(`UPDATE employee
             SET role_id = $1
             WHERE id = $2;`, [answers.role_id, answers.employee_id]);
@@ -192,11 +200,13 @@ async function updateEmployeeRole() {
     }
     mainMenu();
 }
+// Function to view all roles
 async function viewRoles() {
     try {
         const result = await pool.query(`SELECT role.id, role.title, role.salary, department.name AS department_name
             FROM role
-            JOIN department ON role.department_id = department.id;`);
+            JOIN department ON role.department_id = department.id
+            ORDER BY department.id ASC;`);
         const table = new Table({
             head: ['Title', 'Salary', 'Department'],
         });
@@ -211,6 +221,7 @@ async function viewRoles() {
     }
     mainMenu();
 }
+// Function to add a role
 async function addRole() {
     try {
         const answers = await inquirer.prompt([
@@ -238,6 +249,7 @@ async function addRole() {
                 }
             },
         ]);
+        // Insert the new role into the database
         await pool.query(`INSERT INTO role (title, salary, department_id)
         VALUES ($1, $2, $3);`, [answers.role_title, answers.salary, answers.department_id]);
         console.log(`Added ${answers.role_title} to the database successfully.`);
@@ -247,6 +259,7 @@ async function addRole() {
     }
     mainMenu();
 }
+// Function to view all departments
 async function viewDepartments() {
     try {
         const result = await pool.query(`SELECT id, name
@@ -266,6 +279,7 @@ async function viewDepartments() {
     }
     mainMenu();
 }
+// Function to add a department
 async function addDepartment() {
     try {
         const answers = await inquirer.prompt([
@@ -275,6 +289,7 @@ async function addDepartment() {
                 message: `Enter the name of the department:`,
             },
         ]);
+        // Insert the new department into the database
         await pool.query(`INSERT INTO department (name)
             VALUES ($1);`, [answers.department_name]);
         console.log(`Added ${answers.department_name} to the database successfully.`);

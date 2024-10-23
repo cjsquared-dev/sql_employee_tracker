@@ -5,6 +5,8 @@
 ## Description
 A simple CLI Content Management System(CMS) used for managing Employees and their basic data.
 
+Link to Video:  https://drive.google.com/file/d/1C4-B0nBA4XuEDDrQ503B8P4GD8IEA7tD/view
+
 
 # Table of Contents
 * [Installation](#installation)
